@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-11-07T09:28:42.735Z</updated>
+  <updated>2018-12-11T14:29:38.773Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MYSQL 索引</title>
+    <link href="http://yoursite.com/2018/12/11/mysql/"/>
+    <id>http://yoursite.com/2018/12/11/mysql/</id>
+    <published>2018-12-11T14:04:52.465Z</published>
+    <updated>2018-12-11T14:29:38.773Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="MYSQL-索引"><a href="#MYSQL-索引" class="headerlink" title="MYSQL 索引"></a>MYSQL 索引</h1><ul><li><p>索引的好处：<br> 20多条数据源随机生成200万条数据，平均每条数据源都重复大概10万次，表结构比较简单，仅包含一个自增ID，一个char类型，一个text类型和一个int类型，单表2G大小，使用MyIASM引擎。开始测试未添加任何索引。执行下面的SQL语句：</p><p> mysql&gt; SELECT id,FROM_UNIXTIME(time) FROM article WHERE a.title=’测试标题’</p><p>  查询需要的时间非常恐怖的，如果加上联合查询和其他一些约束条件，数据库会疯狂的消耗内存，并且会影响前端程序的执行。这时给title字段添加一个BTREE索引：</p><p> mysql&gt; ALTER TABLE article ADD INDEX index_article_title ON title(200);<br> 再次执行上述查询语句，其对比非常明显</p><p> 测试是否使用了索引进行查询</p> <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">explain select * from table where xxx=1;</span><br></pre></td></tr></table></figure><p> <a href="https://www.cnblogs.com/david97/p/8072164.html" target="_blank" rel="noopener">explain 关键字</a></p></li></ul><hr><ol><li>普通索引<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">create INDEX index_name ON table(column(length))</span><br><span class="line">//直接创建</span><br><span class="line">ALTER TABLE table_name ADD INDEX index_name ON (column(length))</span><br><span class="line">//修改表结构</span><br><span class="line">create table tablename(</span><br><span class="line">    id int not null,</span><br><span class="line">    name varchar(255) not null,</span><br><span class="line">    KEY(name) //index() 也行</span><br><span class="line"></span><br><span class="line">);</span><br><span class="line">//创建表的时候同时创建</span><br><span class="line"></span><br><span class="line">---删除索引</span><br><span class="line">drop INDEX index_name ON table(column(length))</span><br></pre></td></tr></table></figure></li></ol><p>2.唯一索引<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">create UNIQUE INDEX index_name ON table(column(length))</span><br><span class="line">//直接创建</span><br><span class="line">ALTER TABLE table_name ADD UNIQUE index_name ON (column(length))</span><br><span class="line">//修改表结构</span><br><span class="line">create table tablename(</span><br><span class="line">    id int not null,</span><br><span class="line">    name varchar(255) not null,</span><br><span class="line">    UNIQUE INDEX index_name(id)</span><br><span class="line"></span><br><span class="line">);</span><br><span class="line">//创建表的时候同时创建</span><br></pre></td></tr></table></figure></p><p>3.主键索引<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">primary key(id)</span><br></pre></td></tr></table></figure></p><p>4.组合索引</p><ul><li>解释最左前缀<br>  组合索引就是遵从了最左前缀，利用索引中最左边的列集来匹配行，这样的列集称为最左前缀，不明白没关系，举几个例子就明白了，例如，这里由id、name和age3个字段构成的索引，索引行中就按id/name/age的顺序存放，索引可以索引下面字段组合(id，name，age)、(id，name)或者(id)。如果要查询的字段不构成索引最左面的前缀，那么就不会是用索引，比如，age或者（name，age）组合就不会使用索引查询</li></ul><p>　　　　　　　　　　　　　　　　<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">create table tablename(</span><br><span class="line">    id int not null,</span><br><span class="line">    name varchar(255) not null,</span><br><span class="line">    age int not null,</span><br><span class="line">    index index_name(id,name,age)</span><br><span class="line"></span><br><span class="line">);</span><br></pre></td></tr></table></figure></p><p>5.创建全文索引</p><ul><li><p>全文索引可以用于全文搜索，但只有MyISAM存储引擎支持FULLTEXT索引，并且只为CHAR、VARCHAR和TEXT列服务。索引总是对整个列进行，不支持前缀索引，</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">create table tablename(</span><br><span class="line">    id int not null,</span><br><span class="line">    name varchar(255) not null,</span><br><span class="line">    age int not null,</span><br><span class="line">    info varchar(255) not null,</span><br><span class="line">    FULLTEXT INDEX index_name(info)</span><br><span class="line"></span><br><span class="line">);</span><br></pre></td></tr></table></figure></li><li><p>注意：在使用全文搜索时，需要借助MATCH函数，并且其全文搜索的限制比较多，比如只能通过MyISAM引擎，比如只能在CHAR,VARCHAR,TEXT上设置全文索引。比如搜索的关键字默认至少要4个字符，比如搜索的关键字太短就会被忽略掉。等等，如果你们在实验的时候可能会实验不出来。感兴趣的同学可以看看这篇文章<a href="http://blog.sina.com.cn/s/blog_ae1611930101a063.html" target="_blank" rel="noopener">全文搜索的使用</a><br>-</p></li></ul><h2 id="索引的优化"><a href="#索引的优化" class="headerlink" title="索引的优化"></a>索引的优化</h2><ol><li>索引不会包含有NULL值得列<ul><li>只要列中包含有NULL值都将不会被包含在索引中，复合索引中只要有一列含有NULL值，那么这一列对于此复合索引就是无效的。所以我们在数据库设计时不要让字段的默认值为NULL。<br>2.</li></ul></li></ol>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;MYSQL-索引&quot;&gt;&lt;a href=&quot;#MYSQL-索引&quot; class=&quot;headerlink&quot; title=&quot;MYSQL 索引&quot;&gt;&lt;/a&gt;MYSQL 索引&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;索引的好处：&lt;br&gt; 20多条数据源随机生成200万条数据，平均每条数据源
+      
+    
+    </summary>
+    
+      <category term="mysql" scheme="http://yoursite.com/categories/mysql/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>Hello World</title>
