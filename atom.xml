@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2018-12-11T14:29:38.773Z</updated>
+  <updated>2018-12-12T14:19:17.411Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>mysql优化</title>
+    <link href="http://yoursite.com/2018/12/12/mysql-youhua/"/>
+    <id>http://yoursite.com/2018/12/12/mysql-youhua/</id>
+    <published>2018-12-12T14:19:29.262Z</published>
+    <updated>2018-12-12T14:19:17.411Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="mysql优化"><a href="#mysql优化" class="headerlink" title="mysql优化"></a>mysql优化</h1><h2 id="msyql优化方向"><a href="#msyql优化方向" class="headerlink" title="msyql优化方向"></a>msyql优化方向</h2><ul><li>存储层 存储引擎 列类型 范式</li><li>设计层 索引 缓存 分表</li><li>sql层 效率高的sql语句</li><li>架构层 分布式数据库架构 主从同步</li></ul><h3 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h3><ol><li><strong>myisam</strong></li></ol><ul><li>物理文件<ul><li>.frm    结构文件</li><li>.MYD    数据文件</li><li>.MYI    索引文件</li></ul></li><li>存储顺序<ul><li>存储顺序为插入顺序  没有排序</li></ul></li><li>复制备份，压缩机制<ul><li>移动三个物理文件即可备份恢复</li><li>压缩： 节省空间，查询快速(表压缩之后无法进行写入操作,压缩表机制，适合读比较多的场景使用)<ul><li>Mysql\bin  myisamchk.exe – 重建索引及解压缩</li><li>myisampack.exe –压缩<ul><li>cmd &gt; D:\phpstudy\Mysql\bin\myisampack.exe D:\phpstudy\Mysql\data\student</li></ul></li><li>myisamchk.exe –重建索引<ul><li>cmd &gt; D:\phpstudy\Mysql\bin\myisamchk.exe -rq D:\phpstudy\Mysql\data\student</li></ul></li><li>myisamchk.exe –解压缩(压缩操作需要进行表的索引重建，但是解压不需要了，会自动重建。)<ul><li>cmd &gt; D:\phpstudy\Mysql\bin\myisamchk.exe –unpack D:\phpstudy\Mysql\data\student</li></ul></li></ul></li></ul></li><li>并发性： 表级锁（并发写入）<ul><li>并发性稍弱，只有表锁 <a href="https://www.cnblogs.com/qq78292959/archive/2013/01/30/2883109.html" target="_blank" rel="noopener">相关链接</a></li></ul></li></ul><ol start="2"><li><strong>innodb</strong></li></ol><ul><li>物理文件<ul><li>.frm    结构文件</li><li>数据库的所有innodb数据和索引文件都放在data/ibdata1文件中</li></ul></li><li>存储顺序<ul><li>存储顺序为数据主键顺序</li></ul></li><li><p>复制备份</p><ul><li>需要导出sql文件，再导入进行备份和恢复操作</li><li>所以需要进行innodb表数据结构的分开存储操作<ul><li>mysql &gt; show variables like ‘innodb_file_per_table’; //查看innodb存储状态 value off 关闭</li><li>mysql &gt; set global innodb_file_per_table=1;  //临时修改值为开启 value on 开启  建表后数据索引文件就分离 ibdata1了 重启后建表数据还是在一起，但是分开后的就不会再连一起了 xxx.ibd文件–数据和索引文件</li></ul></li></ul></li><li><p>并发性： 擅长并发</p><ul><li>更适合并发写入，并发写中，为了防止数据不一致 使用锁机制</li><li>有更小的锁表粒度,行级别</li></ul></li></ul><ol start="3"><li><strong>如何选择myisam innodb</strong><ul><li>根据引擎的特点进行选择</li><li>功能性上，快速备份恢复myisam；事务和外键，选择innodb</li><li>一般使用myisam，cms（内容管理系统）</li><li>innodb适合使用在抢购功能，订单功能，并发写入较多</li></ul></li></ol><h3 id="字段选取"><a href="#字段选取" class="headerlink" title="字段选取"></a>字段选取</h3><ul><li>age 用tinyint  乌龟年龄 smallint 表数据不超过1600w+  使用mediumint</li><li>内容长度<ul><li>char(255) 固定字符 不足null补齐 varchar(65535) 如果是UTF则最大65535/3 - 1个字符，因为要预留空间存放该字段的字符数目)</li><li>加密密码 手机号 char</li><li>邮箱 varchar</li><li>char查询的效率比varchar高</li></ul></li><li>整型存储<ul><li>尽量使用整型存储其他数据的类型。节省空间提高查询速度<ul><li>时间戳<ul><li>使用int来存储时间。4字节<ul><li>mysql里的时间戳函数</li><li>unix_timestamp()  当前时间戳信息</li><li>from_unixtime()  读取一个时间戳信息</li><li>php用date()转换</li><li>int类型 时间的比较直接比大小就行了</li></ul></li><li>使用int存储IP 计算范围更加方便<ul><li>mysql:  inet_aton(ip) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  inet_ntoa(int)</li><li>php: ip2long(ip)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long2ip(ip)</li></ul></li></ul></li></ul></li></ul></li></ul><h3 id="范式"><a href="#范式" class="headerlink" title="范式"></a>范式</h3><ol><li><strong>第一范式</strong> 列类型具有原子性，每列(或者每个属性)都是不可再分的最小数据单元(也称为最小的原子单元)</li><li><strong>第二范式</strong>  数据具有唯一性 设置主键</li><li><strong>第三范式</strong> 数据字段和主键具有紧密联系/直接关系，不能够有冗（rong）余[重复]数据</li></ol><hr><p>1NF&lt;2NF&lt;3NF，范式是一层层满足的</p><h4 id="逆范式"><a href="#逆范式" class="headerlink" title="逆范式"></a>逆范式</h4><p>&nbsp;&nbsp;一般情况下，设计的表结构符合三范式，被认为是良好的数据机构设计。<br>但是，在很多实际业务场景下，为了能够提高数据表的查询速度，要建立使用冗（rong）余字段。也就不符合第三范式了。为了整 第三范式。<br>之前的查询学生的所有信息（包含系别信息），需要进行连表操作。连表操作，遍历最大数为笛卡尔积（相乘）。可以修改表机构为如下，建立冗余字段。</p><ul><li>建立冗余字段之后，查询变快。在修改和维护数据时，要同时维护冗余字段。保持数据的一致性</li></ul><h2 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h2><h3 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h3>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h1 id=&quot;mysql优化&quot;&gt;&lt;a href=&quot;#mysql优化&quot; class=&quot;headerlink&quot; title=&quot;mysql优化&quot;&gt;&lt;/a&gt;mysql优化&lt;/h1&gt;&lt;h2 id=&quot;msyql优化方向&quot;&gt;&lt;a href=&quot;#msyql优化方向&quot; class=&quot;header
+      
+    
+    </summary>
+    
+      <category term="mysql" scheme="http://yoursite.com/categories/mysql/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>MYSQL 索引</title>
@@ -36,27 +59,6 @@
     </summary>
     
       <category term="mysql" scheme="http://yoursite.com/categories/mysql/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://yoursite.com/2018/11/07/hello-world/"/>
-    <id>http://yoursite.com/2018/11/07/hello-world/</id>
-    <published>2018-11-07T09:28:42.735Z</published>
-    <updated>2018-11-07T09:28:42.735Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-      
-    
-    </summary>
     
     
   </entry>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>mysql优化 | CNsixgod</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="">
+    <meta name="description" content="mysql优化msyql优化方向 存储层 存储引擎 列类型 范式 设计层 索引 缓存 分表 sql层 效率高的sql语句 架构层 分布式数据库架构 主从同步  存储引擎 myisam   物理文件 .frm    结构文件 .MYD    数据文件 .MYI    索引文件   存储顺序 存储顺序为插入顺序  没有排序   复制备份，压缩机制 移动三个物理文件即可备份恢复 压缩： 节省空间，查询快">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql优化">
+<meta property="og:url" content="http://yoursite.com/2018/12/12/mysql-youhua/index.html">
+<meta property="og:site_name" content="CNsixgod">
+<meta property="og:description" content="mysql优化msyql优化方向 存储层 存储引擎 列类型 范式 设计层 索引 缓存 分表 sql层 效率高的sql语句 架构层 分布式数据库架构 主从同步  存储引擎 myisam   物理文件 .frm    结构文件 .MYD    数据文件 .MYI    索引文件   存储顺序 存储顺序为插入顺序  没有排序   复制备份，压缩机制 移动三个物理文件即可备份恢复 压缩： 节省空间，查询快">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-12-12T14:19:17.411Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="mysql优化">
+<meta name="twitter:description" content="mysql优化msyql优化方向 存储层 存储引擎 列类型 范式 设计层 索引 缓存 分表 sql层 效率高的sql语句 架构层 分布式数据库架构 主从同步  存储引擎 myisam   物理文件 .frm    结构文件 .MYD    数据文件 .MYI    索引文件   存储顺序 存储顺序为插入顺序  没有排序   复制备份，压缩机制 移动三个物理文件即可备份恢复 压缩： 节省空间，查询快">
+    
+        <link rel="alternate" type="application/atom+xml" title="CNsixgod" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand1.png)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">sixgod</h5>
+          <a href="mailto:1245953602@qq.com" title="1245953602@qq.com" class="mail">1245953602@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                档案
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                标签
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">mysql优化</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="検索">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">mysql优化</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2018-12-12T14:19:29.262Z" itemprop="datePublished" class="page-time">
+  2018-12-12
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/mysql/">mysql</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#mysql优化"><span class="post-toc-number">1.</span> <span class="post-toc-text">mysql优化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#msyql优化方向"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">msyql优化方向</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#存储引擎"><span class="post-toc-number">1.1.1.</span> <span class="post-toc-text">存储引擎</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#字段选取"><span class="post-toc-number">1.1.2.</span> <span class="post-toc-text">字段选取</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#范式"><span class="post-toc-number">1.1.3.</span> <span class="post-toc-text">范式</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#逆范式"><span class="post-toc-number">1.1.3.1.</span> <span class="post-toc-text">逆范式</span></a></li></ol></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#索引"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">索引</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#索引优化"><span class="post-toc-number">1.2.1.</span> <span class="post-toc-text">索引优化</span></a></li></ol></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-mysql-youhua" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">mysql优化</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2018-12-12 22:19:29" datetime="2018-12-12T14:19:29.262Z" itemprop="datePublished">2018-12-12</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/mysql/">mysql</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h1 id="mysql优化"><a href="#mysql优化" class="headerlink" title="mysql优化"></a>mysql优化</h1><h2 id="msyql优化方向"><a href="#msyql优化方向" class="headerlink" title="msyql优化方向"></a>msyql优化方向</h2><ul>
+<li>存储层 存储引擎 列类型 范式</li>
+<li>设计层 索引 缓存 分表</li>
+<li>sql层 效率高的sql语句</li>
+<li>架构层 分布式数据库架构 主从同步</li>
+</ul>
+<h3 id="存储引擎"><a href="#存储引擎" class="headerlink" title="存储引擎"></a>存储引擎</h3><ol>
+<li><strong>myisam</strong></li>
+</ol>
+<ul>
+<li>物理文件<ul>
+<li>.frm    结构文件</li>
+<li>.MYD    数据文件</li>
+<li>.MYI    索引文件</li>
+</ul>
+</li>
+<li>存储顺序<ul>
+<li>存储顺序为插入顺序  没有排序</li>
+</ul>
+</li>
+<li>复制备份，压缩机制<ul>
+<li>移动三个物理文件即可备份恢复</li>
+<li>压缩： 节省空间，查询快速(表压缩之后无法进行写入操作,压缩表机制，适合读比较多的场景使用)<ul>
+<li>Mysql\bin  myisamchk.exe – 重建索引及解压缩</li>
+<li>myisampack.exe –压缩<ul>
+<li>cmd &gt; D:\phpstudy\Mysql\bin\myisampack.exe D:\phpstudy\Mysql\data\student</li>
+</ul>
+</li>
+<li>myisamchk.exe –重建索引<ul>
+<li>cmd &gt; D:\phpstudy\Mysql\bin\myisamchk.exe -rq D:\phpstudy\Mysql\data\student</li>
+</ul>
+</li>
+<li>myisamchk.exe –解压缩(压缩操作需要进行表的索引重建，但是解压不需要了，会自动重建。)<ul>
+<li>cmd &gt; D:\phpstudy\Mysql\bin\myisamchk.exe –unpack D:\phpstudy\Mysql\data\student</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>并发性： 表级锁（并发写入）<ul>
+<li>并发性稍弱，只有表锁 <a href="https://www.cnblogs.com/qq78292959/archive/2013/01/30/2883109.html" target="_blank" rel="noopener">相关链接</a></li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li><strong>innodb</strong></li>
+</ol>
+<ul>
+<li>物理文件<ul>
+<li>.frm    结构文件</li>
+<li>数据库的所有innodb数据和索引文件都放在data/ibdata1文件中</li>
+</ul>
+</li>
+<li>存储顺序<ul>
+<li>存储顺序为数据主键顺序</li>
+</ul>
+</li>
+<li><p>复制备份</p>
+<ul>
+<li>需要导出sql文件，再导入进行备份和恢复操作</li>
+<li>所以需要进行innodb表数据结构的分开存储操作<ul>
+<li>mysql &gt; show variables like ‘innodb_file_per_table’; //查看innodb存储状态 value off 关闭</li>
+<li>mysql &gt; set global innodb_file_per_table=1;  //临时修改值为开启 value on 开启  建表后数据索引文件就分离 ibdata1了 重启后建表数据还是在一起，但是分开后的就不会再连一起了 xxx.ibd文件–数据和索引文件</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>并发性： 擅长并发</p>
+<ul>
+<li>更适合并发写入，并发写中，为了防止数据不一致 使用锁机制</li>
+<li>有更小的锁表粒度,行级别</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li><strong>如何选择myisam innodb</strong><ul>
+<li>根据引擎的特点进行选择</li>
+<li>功能性上，快速备份恢复myisam；事务和外键，选择innodb</li>
+<li>一般使用myisam，cms（内容管理系统）</li>
+<li>innodb适合使用在抢购功能，订单功能，并发写入较多</li>
+</ul>
+</li>
+</ol>
+<h3 id="字段选取"><a href="#字段选取" class="headerlink" title="字段选取"></a>字段选取</h3><ul>
+<li>age 用tinyint  乌龟年龄 smallint 表数据不超过1600w+  使用mediumint</li>
+<li>内容长度<ul>
+<li>char(255) 固定字符 不足null补齐 varchar(65535) 如果是UTF则最大65535/3 - 1个字符，因为要预留空间存放该字段的字符数目)</li>
+<li>加密密码 手机号 char</li>
+<li>邮箱 varchar</li>
+<li>char查询的效率比varchar高</li>
+</ul>
+</li>
+<li>整型存储<ul>
+<li>尽量使用整型存储其他数据的类型。节省空间提高查询速度<ul>
+<li>时间戳<ul>
+<li>使用int来存储时间。4字节<ul>
+<li>mysql里的时间戳函数</li>
+<li>unix_timestamp()  当前时间戳信息</li>
+<li>from_unixtime()  读取一个时间戳信息</li>
+<li>php用date()转换</li>
+<li>int类型 时间的比较直接比大小就行了</li>
+</ul>
+</li>
+<li>使用int存储IP 计算范围更加方便<ul>
+<li>mysql:  inet_aton(ip) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  inet_ntoa(int)</li>
+<li>php: ip2long(ip)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;long2ip(ip)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="范式"><a href="#范式" class="headerlink" title="范式"></a>范式</h3><ol>
+<li><strong>第一范式</strong> 列类型具有原子性，每列(或者每个属性)都是不可再分的最小数据单元(也称为最小的原子单元)</li>
+<li><strong>第二范式</strong>  数据具有唯一性 设置主键</li>
+<li><strong>第三范式</strong> 数据字段和主键具有紧密联系/直接关系，不能够有冗（rong）余[重复]数据</li>
+</ol>
+<hr>
+<p>1NF&lt;2NF&lt;3NF，范式是一层层满足的</p>
+<h4 id="逆范式"><a href="#逆范式" class="headerlink" title="逆范式"></a>逆范式</h4><p>&nbsp;&nbsp;一般情况下，设计的表结构符合三范式，被认为是良好的数据机构设计。<br>但是，在很多实际业务场景下，为了能够提高数据表的查询速度，要建立使用冗（rong）余字段。也就不符合第三范式了。为了整 第三范式。<br>之前的查询学生的所有信息（包含系别信息），需要进行连表操作。连表操作，遍历最大数为笛卡尔积（相乘）。可以修改表机构为如下，建立冗余字段。</p>
+<ul>
+<li>建立冗余字段之后，查询变快。在修改和维护数据时，要同时维护冗余字段。保持数据的一致性</li>
+</ul>
+<h2 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h2><h3 id="索引优化"><a href="#索引优化" class="headerlink" title="索引优化"></a>索引优化</h3>
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最終更新：<time datetime="2018-12-12T14:19:17.411Z" itemprop="dateUpdated">2018-12-12 22:19:17</time>
+</span><br>
+
+
+        
+        转载请注明出处
+        
+    </div>
+    
+    <footer>
+        <a href="http://yoursite.com">
+            <img src="/img/avatar.jpg" alt="sixgod">
+            sixgod
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2018/12/12/mysql-youhua/&title=《mysql优化》 — CNsixgod&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2018/12/12/mysql-youhua/&title=《mysql优化》 — CNsixgod&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2018/12/12/mysql-youhua/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《mysql优化》 — CNsixgod&url=http://yoursite.com/2018/12/12/mysql-youhua/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2018/12/12/mysql-youhua/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2018/12/11/mysql/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">MYSQL 索引</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+<section class="comments" id="comments">
+    <div id="disqus_thread"></div>
+    <script>
+    var disqus_shortname = 'true';
+    lazyScripts.push('//' + disqus_shortname + '.disqus.com/embed.js')
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+      
+    </div>
+    <div class="bottom">
+        <p><span>sixgod &copy; 2015 - 2018</span>
+            <span>
+                
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">true</a><br>
+                
+                
+            </span>
+        </p>
+    </div>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2018/12/12/mysql-youhua/&title=《mysql优化》 — CNsixgod&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2018/12/12/mysql-youhua/&title=《mysql优化》 — CNsixgod&source=" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2018/12/12/mysql-youhua/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《mysql优化》 — CNsixgod&url=http://yoursite.com/2018/12/12/mysql-youhua/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2018/12/12/mysql-youhua/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMklEQVR42u3aS07DMBQF0O5/02WKhJre69cixT4eoZDEPkEy7+PHIx7PP+Pv9Vf3/77SPvXhgYGBcVvG83Ik9yQTt+/P14aBgXEO49XE+T3tU9dLb+fFwMDAuF5uu+hka8bAwMCYMK6Tz+tkNb+CgYGBsZbE5lWvebD4xVwcAwPjhox2cf/581f6GxgYGLdiPMsxaSe0rc1iVRgYGFsz8g0uD8vy3xYJ6uV6MDAwTmasbaNtSpwX8ursGQMDY1NGsl0mwWLbCp08i4GBcQIjSSaT7S9JTSdlvrofi4GBsQWjPdo1qc8nn6wNWB/FToyBgXFXxlrzsn3R5JDEBw5YYGBg3JwxKeK35bbredvS3pvQEAMDY2tG/oq8xL/W+MwLfxgYGHsz2pJZW1zLm6PJJyuSWAwMjI0YeTMgDwfzkC5vPNTfHgMDY1NGvjfnIWCdjl6u4SUPAwNja0bbvFw7zNo2LyepLwYGxn6MtrmYLDo/2Jq3CqK/AAYGxqaMtYMOa4HjJPXNi3EYGBi7MvKCVzL9Z9uc+SfDwMA4k5EXvPJEdPIJRo1MDAyM7Rht4Ngmq2sR6+JRMAwMjJsznuVoU9N5oS1qeWJgYGzNmFTX8+W2BybaAxkYGBgnMNY22XzivEU6Ch8xMDAOYEyS27Vyf576Rv8rMDAwMMrF1TW/clVvDltgYGAcz2hDzHnIGDUhMDAwDmC0R0uTadqtti3bYWBgnMNoA7Vvh4n5YVYMDIwDGD+O7VWDlETd8gAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = 'come back men!';
+            clearTimeout(titleTime);
+        } else {
+            document.title = 'HI!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?0c58a1486de42ac6cc1c59c7d98ae887"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true}});</script></body>
+</html>
